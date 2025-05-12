@@ -17,8 +17,8 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const category_service_1 = require("./category.service");
-const createCategoryIntoDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield category_service_1.categoryServices.createCategoryIntoDb(req.body);
+const createCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield category_service_1.categoryServices.createCategory(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.CREATED,
         success: true,
@@ -26,6 +26,16 @@ const createCategoryIntoDb = (0, catchAsync_1.default)((req, res) => __awaiter(v
         data: result,
     });
 }));
+const getAllCategories = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield category_service_1.categoryServices.getAllCategories();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.CREATED,
+        success: true,
+        message: "All Categories retrived Successfully",
+        data: result,
+    });
+}));
 exports.categoryControllers = {
-    createCategoryIntoDb,
+    createCategory,
+    getAllCategories
 };

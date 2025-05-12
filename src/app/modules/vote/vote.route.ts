@@ -8,6 +8,6 @@ import { userRole } from "../../../../generated/prisma";
 const router = Router();
 
 router.post("/create-vote",auth(userRole.admin,userRole.member),voteController.createVote);
-router.patch("/remove-vote",auth(userRole.admin,userRole.member),voteController.removeVote)
+router.delete("/remove-vote",auth(userRole.admin,userRole.member),voteController.removeVote)
 
 export const voteRouter = router;

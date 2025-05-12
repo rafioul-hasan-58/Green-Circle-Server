@@ -11,7 +11,7 @@ const createVote = catchAsync(async (req: Request & { user?: IAuthUser }, res: R
     sendResponse(res, {
         statusCode: status.CREATED,
         success: true,
-        message: "Your vote added Successfully",
+        message: "Your vote added Successfully", 
         data: result,
     });
 });

@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const ideaStatusEnum = z.enum(["pending", "approved", "rejected"]);
-
+const categoryEnum = z.enum(["energy", "waste", "transportation"]);
 export const createIdeaValidationSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  categoryId: z.string().min(1),
+  category: categoryEnum,
   images: z.array(z.string()).optional(),
   authorId: z.string().min(1),
   problem_statement: z.string().min(1),
@@ -18,7 +18,7 @@ export const createIdeaValidationSchema = z.object({
 export const updateIdeaValidationSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
-  categoryId: z.string().optional(),
+  category: categoryEnum.optional(),
   images: z.array(z.string()).optional(),
   authorId: z.string().optional(),
   problem_statement: z.string().optional(),

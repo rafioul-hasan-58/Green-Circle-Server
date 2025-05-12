@@ -13,47 +13,47 @@ exports.commentService = void 0;
 const prisma_1 = require("../../utils/prisma");
 const createComment = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
     const result = prisma_1.prisma.comment.create({
-        data: Object.assign(Object.assign({}, payload), { commentorId: user.userId })
+        data: Object.assign(Object.assign({}, payload), { commenterId: user.userId }),
     });
     return result;
 });
 const editComment = (id, payload, user) => __awaiter(void 0, void 0, void 0, function* () {
     const commentData = yield prisma_1.prisma.comment.findUnique({
         where: {
-            id
-        }
+            id,
+        },
     });
-    if ((commentData === null || commentData === void 0 ? void 0 : commentData.commentorId) !== user.userId) {
-        throw new Error('You cannot update this comment');
+    if ((commentData === null || commentData === void 0 ? void 0 : commentData.commenterId) !== user.userId) {
+        throw new Error("You cannot update this comment");
     }
     const result = yield prisma_1.prisma.comment.update({
         where: {
-            id
+            id,
         },
         data: {
-            content: payload.content
-        }
+            content: payload.content,
+        },
     });
     return result;
 });
 const deleteComment = (id, user) => __awaiter(void 0, void 0, void 0, function* () {
     const commentData = yield prisma_1.prisma.comment.findUnique({
         where: {
-            id
-        }
+            id,
+        },
     });
-    if ((commentData === null || commentData === void 0 ? void 0 : commentData.commentorId) !== user.userId) {
-        throw new Error('You cannot delete this comment');
+    if ((commentData === null || commentData === void 0 ? void 0 : commentData.commenterId) !== user.userId) {
+        throw new Error("You cannot delete this comment");
     }
     const result = yield prisma_1.prisma.comment.delete({
         where: {
-            id
-        }
+            id,
+        },
     });
     return result;
 });
 exports.commentService = {
     createComment,
     editComment,
-    deleteComment
+    deleteComment,
 };

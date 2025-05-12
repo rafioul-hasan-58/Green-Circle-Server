@@ -24,10 +24,9 @@ const sendEmail = (email, html) => __awaiter(void 0, void 0, void 0, function* (
             pass: config_1.default.app_password,
         },
         tls: {
-            rejectUnauthorized: false
-        }
+            rejectUnauthorized: false,
+        },
     });
-    console.log(email);
     // send mail with defined transport object
     const info = yield transporter.sendMail({
         from: '"PH-HealthCare 👻" <rafioulhasan2@gmail.com>',
@@ -36,7 +35,6 @@ const sendEmail = (email, html) => __awaiter(void 0, void 0, void 0, function* (
         // text: "Hello world?", // plain text body
         html, // html body
     });
-    console.log(``, info.messageId);
     // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
 });
 exports.default = sendEmail;

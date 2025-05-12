@@ -13,6 +13,8 @@ exports.voteServices = void 0;
 const prisma_1 = require("../../utils/prisma");
 const createVote = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
     let isVoteExists;
+    let isIdeaExists;
+    let isBlogExists;
     if (payload.ideaId) {
         isVoteExists = yield prisma_1.prisma.vote.findUnique({
             where: {
@@ -20,6 +22,11 @@ const createVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
                     voterId: user.userId,
                     ideaId: payload.ideaId
                 }
+            }
+        });
+        isIdeaExists = yield prisma_1.prisma.idea.findUnique({
+            where: {
+                id: payload.ideaId
             }
         });
     }
@@ -32,23 +39,24 @@ const createVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
                 }
             }
         });
+        isBlogExists = yield prisma_1.prisma.blog.findUnique({
+            where: {
+                id: payload.blogId
+            }
+        });
+    }
+    if (payload.ideaId && !isIdeaExists) {
+        throw new Error("Idea doesnot exists");
+    }
+    if (payload.blogId && !isBlogExists) {
+        throw new Error("Blog doesnot exists");
     }
     let result;
     if (isVoteExists) {
-        if (isVoteExists.isDeleted === true) {
+        if ((isVoteExists.blogId === payload.blogId && isVoteExists.voterId === user.userId) || (isVoteExists.ideaId === payload.ideaId && isVoteExists.voterId === user.userId)) {
             result = yield prisma_1.prisma.vote.update({
                 where: {
-                    vote_id: isVoteExists === null || isVoteExists === void 0 ? void 0 : isVoteExists.vote_id
-                },
-                data: {
-                    isDeleted: false
-                }
-            });
-        }
-        else if ((isVoteExists.blogId === payload.blogId && isVoteExists.voterId === payload.voterId) || (isVoteExists.ideaId === payload.ideaId && isVoteExists.voterId === payload.voterId)) {
-            result = yield prisma_1.prisma.vote.update({
-                where: {
-                    vote_id: isVoteExists.vote_id
+                    id: isVoteExists.id
                 },
                 data: {
                     value: payload.value
@@ -88,12 +96,9 @@ const removeVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
     if (!isVoteExists) {
         throw new Error("Vote is not found");
     }
-    const result = yield prisma_1.prisma.vote.update({
+    const result = yield prisma_1.prisma.vote.delete({
         where: {
-            vote_id: isVoteExists.vote_id
-        },
-        data: {
-            isDeleted: true
+            id: isVoteExists.id
         }
     });
     return result;

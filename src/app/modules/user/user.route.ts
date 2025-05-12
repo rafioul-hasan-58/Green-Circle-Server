@@ -3,7 +3,10 @@ import { userController } from "./user.controller";
 import auth from "../../middlewares/auth";
 import { userRole } from "../../../../generated/prisma";
 import validateRequest from "../../middlewares/validateRequest";
-import { createUserValidationSchema } from "./user.validation";
+import {
+  createUserValidationSchema,
+  updateUserValidationSchema,
+} from "./user.validation";
 
 const router = Router();
 
@@ -28,5 +31,7 @@ router.delete(
   userController.deleteUser
 );
 
+router.get("/", auth(userRole.admin), userController.getAllUserFromDb);
+router.get("/:id", userController.getSingleUserFromDb);
 
 export const userRouter = router;

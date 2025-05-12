@@ -24,57 +24,49 @@ model User {
   Blog                Blog[]
   Vote                Vote[]
   Comment             Comment[]
+  Payment             Payment[]
 
   @@map("users")
 }
 
-model Category {
-  id        String       @id @default(uuid())
-  name      categoryName
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  Idea      Idea[]
-  Blog      Blog[]
-
-  @@map("categories")
-}
-
 model Idea {
-  id                String     @id @default(uuid())
+  id                String       @id @default(uuid())
   title             String
   description       String
-  categoryId        String
-  category          Category   @relation(fields: [categoryId], references: [id])
+  category          categoryName
   images            String[]
   authorId          String
-  author            User       @relation(fields: [authorId], references: [id])
+  author            User         @relation(fields: [authorId], references: [id])
   problem_statement String
   proposed_solution String
-  isPremium         Boolean    @default(false)
+  isPremium         Boolean      @default(false)
   price             String
-  status            ideaStatus @default(pending)
-  isDeleted         Boolean    @default(false)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  status            ideaStatus   @default(pending)
+  isDeleted         Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
   Vote              Vote[]
   Comment           Comment[]
+  Payment           Payment[]
 
   @@map("ideas")
 }
 
 model Blog {
-  id          String     @id @default(uuid())
-  title       String     @unique
+  id          String       @id @default(uuid())
+  title       String       @unique
   images      String[]
   description String
   authorId    String
-  author      User       @relation(fields: [authorId], references: [id])
-  categoryId  String
-  category    Category   @relation(fields: [categoryId], references: [id])
+  author      User         @relation(fields: [authorId], references: [id])
+  category    categoryName
   status      blogStatus
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   Vote        Vote[]
+  categoryId  String?
+
+  @@map("blogs")
 }
 
 model Vote {
@@ -90,17 +82,38 @@ model Vote {
 
   @@unique([voterId, ideaId])
   @@unique([voterId, blogId])
+  @@map("votes")
 }
 
 model Comment {
   id          String   @id @default(uuid())
   content     String
-  commentorId String
-  commentor   User     @relation(fields: [commentorId], references: [id])
+  commenterId String
+  commenter   User     @relation(fields: [commenterId], references: [id])
   ideaId      String
   idea        Idea     @relation(fields: [ideaId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("comments")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  ideaId        String
+  ideaTitle     String
+  idea          Idea          @relation(fields: [ideaId], references: [id])
+  authorId      String
+  author        User          @relation(fields: [authorId], references: [id])
+  transactionId String        @unique
+  status        paymentStatus @default(pending)
+  amount        Int
+  isDeleted     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([ideaId, authorId])
+  @@map("payments")
 }
 
 enum ideaStatus {
@@ -108,6 +121,12 @@ enum ideaStatus {
   draft
   published
   unpublished
+}
+
+enum paymentStatus {
+  pending
+  paid
+  unpaid
 }
 
 enum blogStatus {

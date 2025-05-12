@@ -32,6 +32,18 @@ const getAllBlogs = catchAsync(async (req: Request, res: Response) => {
     data: result.data,
   });
 });
+const getMyBlogs = catchAsync(async (req: Request &{user?:IAuthUser}, res: Response) => {
+  const filters = pick(req.query, blogfilterableFields);
+  const paginationOptions = pick(req.body, paginationQueries);
+  const result = await blogServices.getMyBlogs(filters, paginationOptions,req.user as IAuthUser);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Blogs retrieved successfully",
+    meta: result.meta,
+    data: result.data,
+  });
+});
 const getSingleBlog = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await blogServices.getBlog(id);
@@ -52,6 +64,16 @@ const editBlog = catchAsync(async (req: Request & { user?: IAuthUser }, res: Res
     data: result,
   });
 });
+const removeImage = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await blogServices.removeImage(id,req.body.image);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Image removed successfully",
+    data: result,
+  });
+});
 const deleteBlog = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
   const { id } = req.params;
   const result = await blogServices.deleteBlog(id, req.user as IAuthUser);
@@ -68,5 +90,7 @@ export const blogController = {
   getSingleBlog,
   getAllBlogs,
   editBlog,
-  deleteBlog
+  deleteBlog,
+  getMyBlogs,
+  removeImage
 };

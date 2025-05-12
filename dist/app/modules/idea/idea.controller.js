@@ -17,9 +17,12 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const idea_service_1 = require("./idea.service");
-const createIdeaIntoDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const pick_1 = __importDefault(require("../../utils/pick"));
+const idea_constant_1 = require("./idea.constant");
+const prisma_1 = require("../../utils/prisma");
+const createIdea = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
-    const result = yield idea_service_1.ideaServices.createIdeaIntoDb(req.body, user);
+    const result = yield idea_service_1.ideaServices.createIdea(req.body, user);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.CREATED,
         success: true,
@@ -27,18 +30,21 @@ const createIdeaIntoDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         data: result,
     });
 }));
-const getAllIdeasFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield idea_service_1.ideaServices.getAllIdeasFromDb();
+const getAllIdeas = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const ideaFilters = (0, pick_1.default)(req.query, idea_constant_1.ideaFilterableFields);
+    const paginationOptions = (0, pick_1.default)(req.query, prisma_1.paginationQueries);
+    const result = yield idea_service_1.ideaServices.getAllIdeas(ideaFilters, paginationOptions);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
         message: "All Ideas Retrieved Successfully",
-        data: result,
+        meta: result.meta,
+        data: result.data,
     });
 }));
-const getSingleIdeaFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getSingleIdea = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield idea_service_1.ideaServices.getSingleIdeaFromDb(id);
+    const result = yield idea_service_1.ideaServices.getSingleIdea(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -46,20 +52,20 @@ const getSingleIdeaFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(vo
         data: result,
     });
 }));
-const getAllIdeasForMemberFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getMyIdeas = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
-    const result = yield idea_service_1.ideaServices.getAllIdeasForMemberFromDb(user);
+    const result = yield idea_service_1.ideaServices.getMyIdeas(user);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "All Ideas Retrieved Successfully",
+        message: "My Ideas Retrieved Successfully",
         data: result,
     });
 }));
-const updateIdeaIntoDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateIdea = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
     const { id } = req.params;
-    const result = yield idea_service_1.ideaServices.updateIdeaIntoDb(user, id, req.body);
+    const result = yield idea_service_1.ideaServices.updateIdea(user, id, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -67,10 +73,10 @@ const updateIdeaIntoDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         data: result,
     });
 }));
-const deleteIdeaFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteIdea = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
     const { id } = req.params;
-    const result = yield idea_service_1.ideaServices.deleteIdeaFromDb(user, id);
+    const result = yield idea_service_1.ideaServices.deleteIdea(user, id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
@@ -79,10 +85,10 @@ const deleteIdeaFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 
     });
 }));
 exports.ideaControllers = {
-    createIdeaIntoDb,
-    getAllIdeasFromDb,
-    getSingleIdeaFromDb,
-    getAllIdeasForMemberFromDb,
-    updateIdeaIntoDb,
-    deleteIdeaFromDb,
+    createIdea,
+    getAllIdeas,
+    getSingleIdea,
+    getMyIdeas,
+    updateIdea,
+    deleteIdea,
 };

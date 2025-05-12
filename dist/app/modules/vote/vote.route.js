@@ -10,5 +10,5 @@ const auth_1 = __importDefault(require("../../middlewares/auth"));
 const prisma_1 = require("../../../../generated/prisma");
 const router = (0, express_1.Router)();
 router.post("/create-vote", (0, auth_1.default)(prisma_1.userRole.admin, prisma_1.userRole.member), vote_controller_1.voteController.createVote);
-router.patch("/remove-vote", (0, auth_1.default)(prisma_1.userRole.admin, prisma_1.userRole.member), vote_controller_1.voteController.removeVote);
+router.delete("/remove-vote", (0, auth_1.default)(prisma_1.userRole.admin, prisma_1.userRole.member), vote_controller_1.voteController.removeVote);
 exports.voteRouter = router;

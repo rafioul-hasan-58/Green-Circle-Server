@@ -8,52 +8,84 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ideaServices = void 0;
-const prisma_1 = require("../../utils/prisma");
-const createIdeaIntoDb = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
-    const isUserExists = yield prisma_1.prisma.user.findUnique({
-        where: {
-            email: user.email,
-        },
-    });
-    if (!isUserExists) {
+const prisma_1 = require("../../../../generated/prisma");
+const calculatePagination_1 = __importDefault(require("../../utils/calculatePagination"));
+const prisma_2 = require("../../utils/prisma");
+const idea_constant_1 = require("./idea.constant");
+const createIdea = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!user.userId) {
         throw new Error("User not found");
     }
-    const isCategoryExists = yield prisma_1.prisma.category.findUnique({
-        where: {
-            category_id: payload.categoryId,
-        },
-    });
-    if (!isCategoryExists) {
-        throw new Error("Category not found");
-    }
-    const authorId = isUserExists === null || isUserExists === void 0 ? void 0 : isUserExists.id;
-    const result = yield prisma_1.prisma.idea.create({
-        data: {
-            title: payload.title,
-            description: payload.description,
-            categoryId: payload.categoryId,
-            images: payload.images,
-            authorId: authorId,
-            price: payload.price,
-            problem_statement: payload.problem_statement,
-            proposed_solution: payload.proposed_solution,
-        },
+    const result = yield prisma_2.prisma.idea.create({
+        data: Object.assign(Object.assign({}, payload), { authorId: user.userId }),
         include: {
             author: true,
         },
     });
     return result;
 });
-const getAllIdeasFromDb = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.prisma.idea.findMany({
-        where: {
-            isDeleted: false,
-        },
+const getAllIdeas = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
+    const { searchTerm, author } = filters, filterData = __rest(filters, ["searchTerm", "author"]);
+    const { limit, page, skip, sortBy, sortOrder } = (0, calculatePagination_1.default)(paginationOptions);
+    const andCondition = [];
+    if (searchTerm) {
+        andCondition.push({
+            OR: idea_constant_1.ideaSearchAbleFields.map((field) => ({
+                [field]: {
+                    contains: searchTerm,
+                    mode: "insensitive",
+                },
+            })),
+        });
+    }
+    if (author) {
+        andCondition.push({
+            author: {
+                name: {
+                    contains: author,
+                    mode: "insensitive",
+                },
+            },
+        });
+    }
+    // add filterData condition
+    if (Object.keys(filterData).length > 0) {
+        const filterConditions = Object.keys(filterData).map((key) => ({
+            [key]: {
+                equals: filterData[key],
+            },
+        }));
+        andCondition.push(...filterConditions);
+    }
+    const whereConditions = andCondition.length > 0 ? { AND: andCondition } : {};
+    const result = yield prisma_2.prisma.idea.findMany({
+        where: whereConditions,
+        skip,
+        take: limit,
+        orderBy: sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
         include: {
             Vote: true,
+            author: true,
         },
+    });
+    const total = yield prisma_2.prisma.idea.count({
+        where: whereConditions,
     });
     const enhancedIdeas = result.map((idea) => {
         const votes = idea.Vote || [];
@@ -61,21 +93,28 @@ const getAllIdeasFromDb = () => __awaiter(void 0, void 0, void 0, function* () {
         const downVotes = votes.filter((v) => v.value === "down").length;
         return Object.assign(Object.assign({}, idea), { up_votes: upVotes, down_votes: downVotes, total_votes: upVotes + downVotes });
     });
-    return enhancedIdeas;
+    return {
+        meta: {
+            total,
+            page,
+            limit,
+        },
+        data: enhancedIdeas,
+    };
 });
-const getSingleIdeaFromDb = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const isIdeaExists = yield prisma_1.prisma.idea.findUnique({
+const getSingleIdea = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const isIdeaExists = yield prisma_2.prisma.idea.findUnique({
         where: {
-            idea_id: id,
+            id,
             isDeleted: false,
         },
     });
     if (!isIdeaExists) {
         throw new Error("Idea not found");
     }
-    const result = yield prisma_1.prisma.idea.findUnique({
+    const result = yield prisma_2.prisma.idea.findUnique({
         where: {
-            idea_id: id,
+            id,
         },
     });
     if (!result) {
@@ -83,11 +122,11 @@ const getSingleIdeaFromDb = (id) => __awaiter(void 0, void 0, void 0, function* 
     }
     return result;
 });
-const getAllIdeasForMemberFromDb = (user) => __awaiter(void 0, void 0, void 0, function* () {
+const getMyIdeas = (user) => __awaiter(void 0, void 0, void 0, function* () {
     if (user.role !== "member") {
         throw new Error("User is not a member");
     }
-    const isUserExists = yield prisma_1.prisma.user.findUnique({
+    const isUserExists = yield prisma_2.prisma.user.findUnique({
         where: {
             email: user.email,
         },
@@ -95,13 +134,12 @@ const getAllIdeasForMemberFromDb = (user) => __awaiter(void 0, void 0, void 0, f
     if (!isUserExists) {
         throw new Error("User not found");
     }
-    const result = yield prisma_1.prisma.idea.findMany({
+    const result = yield prisma_2.prisma.idea.findMany({
         where: {
             authorId: isUserExists.id,
             isDeleted: false,
         },
         include: {
-            category: true,
             author: true,
         },
     });
@@ -110,58 +148,48 @@ const getAllIdeasForMemberFromDb = (user) => __awaiter(void 0, void 0, void 0, f
     }
     return result;
 });
-const updateIdeaIntoDb = (user, id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isUserExists = yield prisma_1.prisma.user.findUnique({
-        where: {
-            email: user.email,
-        },
-    });
-    if (!isUserExists) {
+const updateIdea = (user, id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!user.userId) {
         throw new Error("User not found");
     }
-    const isIdeaExists = yield prisma_1.prisma.idea.findUnique({
+    const isIdeaExists = yield prisma_2.prisma.idea.findUnique({
         where: {
-            idea_id: id,
+            id,
         },
     });
     if (!isIdeaExists) {
         throw new Error("Idea not found");
     }
-    if (isUserExists.id !== isIdeaExists.authorId) {
-        throw new Error("You are not the author of this idea");
+    if (user.userId !== isIdeaExists.authorId && user.role !== prisma_1.userRole.admin) {
+        throw new Error("You cannot update this");
     }
-    const result = yield prisma_1.prisma.idea.update({
+    const result = yield prisma_2.prisma.idea.update({
         where: {
-            idea_id: id,
+            id,
             isDeleted: false,
         },
         data: payload,
     });
     return result;
 });
-const deleteIdeaFromDb = (user, id) => __awaiter(void 0, void 0, void 0, function* () {
-    const isUserExists = yield prisma_1.prisma.user.findUnique({
-        where: {
-            email: user.email,
-        },
-    });
-    if (!isUserExists) {
+const deleteIdea = (user, id) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!user.userId) {
         throw new Error("User not found");
     }
-    const isIdeaExists = yield prisma_1.prisma.idea.findUnique({
+    const isIdeaExists = yield prisma_2.prisma.idea.findUnique({
         where: {
-            idea_id: id,
+            id,
         },
     });
     if (!isIdeaExists) {
         throw new Error("Idea not found");
     }
-    if (isUserExists.id !== isIdeaExists.authorId) {
-        throw new Error("You are not the author of this idea");
+    if (user.userId !== isIdeaExists.authorId && user.role !== prisma_1.userRole.admin) {
+        throw new Error("You cannot delete this");
     }
-    const result = yield prisma_1.prisma.idea.update({
+    const result = yield prisma_2.prisma.idea.update({
         where: {
-            idea_id: id,
+            id,
             isDeleted: false,
         },
         data: {
@@ -171,10 +199,10 @@ const deleteIdeaFromDb = (user, id) => __awaiter(void 0, void 0, void 0, functio
     return result;
 });
 exports.ideaServices = {
-    createIdeaIntoDb,
-    getAllIdeasFromDb,
-    getAllIdeasForMemberFromDb,
-    getSingleIdeaFromDb,
-    updateIdeaIntoDb,
-    deleteIdeaFromDb,
+    createIdea,
+    getAllIdeas,
+    getMyIdeas,
+    getSingleIdea,
+    updateIdea,
+    deleteIdea,
 };

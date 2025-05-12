@@ -7,24 +7,13 @@ import { ideaSearchAbleFields } from "./idea.constant";
 import { TIdeaFilterRequest } from "./idea.interface";
 
 const createIdea = async (payload: Idea, user: IAuthUser) => {
-
   if (!user.userId) {
     throw new Error("User not found");
   }
-  const isCategoryExists = await prisma.category.findUnique({
-    where: {
-      id: payload.categoryId,
-    },
-  });
-  if (!isCategoryExists) {
-    throw new Error("Category not found");
-  }
-
   const result = await prisma.idea.create({
     data: {
       ...payload,
       authorId: user.userId,
-
     },
     include: {
       author: true,
@@ -33,73 +22,67 @@ const createIdea = async (payload: Idea, user: IAuthUser) => {
   return result;
 };
 
-const getAllIdeas = async (filters: TIdeaFilterRequest, paginationOptions: IPaginationOptions) => {
-  const { searchTerm, category, author, ...filterData } = filters;
-  const { limit, page, skip, sortBy, sortOrder } = calculatePagination(paginationOptions)
+const getAllIdeas = async (
+  filters: TIdeaFilterRequest,
+  paginationOptions: IPaginationOptions
+) => {
+  const { searchTerm, author, ...filterData } = filters;
+  const { limit, page, skip, sortBy, sortOrder } =
+    calculatePagination(paginationOptions);
   const andCondition: Prisma.IdeaWhereInput[] = [];
 
   if (searchTerm) {
     andCondition.push({
-      OR: ideaSearchAbleFields.map(field => ({
+      OR: ideaSearchAbleFields.map((field) => ({
         [field]: {
           contains: searchTerm,
-          mode: 'insensitive'
-        }
-      }))
-    })
-  }
-
-  if (category) {
-    andCondition.push({
-      category: {
-        name: {
-          equals: category
-        }
-      }
-    })
+          mode: "insensitive",
+        },
+      })),
+    });
   }
   if (author) {
     andCondition.push({
       author: {
         name: {
           contains: author,
-          mode: 'insensitive'
-        }
-      }
-    })
+          mode: "insensitive",
+        },
+      },
+    });
   }
   // add filterData condition
   if (Object.keys(filterData).length > 0) {
-    const filterConditions = Object.keys(filterData).map(key => ({
+    const filterConditions = Object.keys(filterData).map((key) => ({
       [key]: {
-        equals: filterData[key as keyof typeof filterData]
-      }
-    }))
-    andCondition.push(...filterConditions)
+        equals: filterData[key as keyof typeof filterData],
+      },
+    }));
+    andCondition.push(...filterConditions);
   }
 
-  const whereConditions: Prisma.IdeaWhereInput = andCondition.length > 0 ? { AND: andCondition } : {}
+  const whereConditions: Prisma.IdeaWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
 
   const result = await prisma.idea.findMany({
     where: whereConditions,
     skip,
     take: limit,
-    orderBy: sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: 'desc' },
+    orderBy:
+      sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
     include: {
       Vote: true,
-      category: true,
-      author: true
+      author: true,
     },
   });
   const total = await prisma.idea.count({
-    where: whereConditions
-  })
+    where: whereConditions,
+  });
   const enhancedIdeas = result.map((idea) => {
     const votes = idea.Vote || [];
 
     const upVotes = votes.filter((v) => v.value === "up").length;
     const downVotes = votes.filter((v) => v.value === "down").length;
-
 
     return {
       ...idea,
@@ -112,12 +95,11 @@ const getAllIdeas = async (filters: TIdeaFilterRequest, paginationOptions: IPagi
     meta: {
       total,
       page,
-      limit
+      limit,
     },
-    data: enhancedIdeas
-  }
+    data: enhancedIdeas,
+  };
 };
-
 
 const getSingleIdea = async (id: string) => {
   const isIdeaExists = await prisma.idea.findUnique({
@@ -161,7 +143,6 @@ const getMyIdeas = async (user: IAuthUser) => {
       isDeleted: false,
     },
     include: {
-      category: true,
       author: true,
     },
   });
@@ -171,7 +152,6 @@ const getMyIdeas = async (user: IAuthUser) => {
   return result;
 };
 const updateIdea = async (user: IAuthUser, id: string, payload: Idea) => {
-
   if (!user.userId) {
     throw new Error("User not found");
   }
@@ -197,7 +177,6 @@ const updateIdea = async (user: IAuthUser, id: string, payload: Idea) => {
   return result;
 };
 const deleteIdea = async (user: IAuthUser, id: string) => {
-
   if (!user.userId) {
     throw new Error("User not found");
   }

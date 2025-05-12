@@ -38,26 +38,16 @@ const createVote = async (payload: IVote, user: IAuthUser) => {
             }
         })
     }
-    if (!isIdeaExists) {
+    if (payload.ideaId && !isIdeaExists) {
         throw new Error("Idea doesnot exists");
     }
-    if (!isBlogExists) {
+    if (payload.blogId && !isBlogExists) {
         throw new Error("Blog doesnot exists");
     }
     let result;
 
     if (isVoteExists) {
-        if (isVoteExists.isDeleted === true) {
-            result = await prisma.vote.update({
-                where: {
-                    id: isVoteExists?.id
-                },
-                data: {
-                    isDeleted: false
-                }
-            })
-        }
-        else if ((isVoteExists.blogId === payload.blogId && isVoteExists.voterId === user.userId) || (isVoteExists.ideaId === payload.ideaId && isVoteExists.voterId === user.userId)) {
+        if ((isVoteExists.blogId === payload.blogId && isVoteExists.voterId === user.userId) || (isVoteExists.ideaId === payload.ideaId && isVoteExists.voterId === user.userId)) {
             result = await prisma.vote.update({
                 where: {
                     id: isVoteExists.id
@@ -80,7 +70,6 @@ const createVote = async (payload: IVote, user: IAuthUser) => {
     return result
 }
 const removeVote = async (payload: Partial<IVote>, user: IAuthUser) => {
-
     let isVoteExists
     if (payload.ideaId) {
         isVoteExists = await prisma.vote.findUnique({
@@ -104,12 +93,9 @@ const removeVote = async (payload: Partial<IVote>, user: IAuthUser) => {
     if (!isVoteExists) {
         throw new Error("Vote is not found")
     }
-    const result = await prisma.vote.update({
+    const result = await prisma.vote.delete({
         where: {
             id: isVoteExists.id
-        },
-        data: {
-            isDeleted: true
         }
     })
     return result

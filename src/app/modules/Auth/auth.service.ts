@@ -34,7 +34,7 @@ const login = async (payload: { email: string; password: string }) => {
     {
       email: userData.email,
       role: userData.role,
-      userId: userData.id
+      userId: userData.id,
     },
     config.jwt_refresh_secret as string,
     (config.jwt_refresh_expires_in as string) || "1d"
@@ -66,7 +66,7 @@ const refreshToken = async (token: string) => {
     {
       email: userData.email,
       role: userData.role,
-      userId: userData.id
+      userId: userData.id,
     },
     config.jwt_secret as string,
     config.jwt_expires_in as string
@@ -143,14 +143,11 @@ const forgotPassword = async (payload: { email: string }) => {
         </div>
         `
   );
-  //console.log(resetPassLink)
 };
 const resetPassword = async (
   token: string,
   payload: { id: string; password: string }
 ) => {
-  console.log({ token, payload });
-
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       id: payload.id,

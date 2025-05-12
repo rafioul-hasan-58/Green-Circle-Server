@@ -6,12 +6,12 @@ import { userServices } from "./user.service";
 import { IAuthUser } from "./user.interface";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await userServices.registerUser(req.body);
+  const { result, accessToken } = await userServices.registerUser(req.body);
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
     message: "User Registered Successfully",
-    data: result,
+    data: { data: result, accessToken },
   });
 });
 const getMyProfile = catchAsync(
@@ -52,9 +52,31 @@ const deleteUser = catchAsync(
   }
 );
 
+const getAllUserFromDb = catchAsync(async (req, res) => {
+  const result = await userServices.getAllUserFromDb();
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Users are Retrieved Successfully",
+    data: result,
+  });
+});
+const getSingleUserFromDb = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await userServices.getSingleUserFromDb(id);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "User is Retrieved Successfully",
+    data: result,
+  });
+});
+
 export const userController = {
   registerUser,
   getMyProfile,
   deleteUser,
   updateUser,
+  getAllUserFromDb,
+  getSingleUserFromDb,
 };

@@ -1,8 +1,19 @@
+import config from "../../config";
+import AppError from "../../errors/AppError";
+import { jwtHelpers } from "../../utils/jwt.helpers";
 import { prisma } from "../../utils/prisma";
 import { IAuthUser, IUser } from "./user.interface";
 import bcrypt from "bcrypt";
-
+import status from "http-status";
 const registerUser = async (payload: IUser) => {
+  const isUserExists = await prisma.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+  });
+  if (isUserExists) {
+    throw new AppError(status.NOT_ACCEPTABLE, "This email is already in use");
+  }
   const { password } = payload;
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -12,11 +23,22 @@ const registerUser = async (payload: IUser) => {
       email: payload.email,
       password: hashedPassword,
       address: payload.address,
-      role: payload.role,
       image: payload.image,
     },
   });
-  return result;
+  if (!result) {
+    throw new Error("User not created");
+  }
+  const accessToken = jwtHelpers.generateToken(
+    {
+      email: result.email,
+      role: result.role,
+      userId: result.id,
+    },
+    config.jwt_secret as string,
+    config.jwt_expires_in as string
+  );
+  return { result, accessToken };
 };
 
 const getMyProfile = async (user: IAuthUser) => {
@@ -75,9 +97,28 @@ const deleteUser = async (user: IAuthUser, deletedId: string) => {
   });
   return result;
 };
+
+const getAllUserFromDb = async () => {
+  const userData = await prisma.user.findMany();
+  return userData;
+};
+const getSingleUserFromDb = async (id: string) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+  if (!userData) {
+    throw new AppError(status.NOT_FOUND, "User not found!");
+  }
+  return userData;
+};
 export const userServices = {
   registerUser,
   getMyProfile,
   deleteUser,
   updateUser,
+  getAllUserFromDb,
+  getSingleUserFromDb,
 };

@@ -14,6 +14,7 @@ router.post(
   blogController.writeBlog
 );
 router.get("/get-all-blogs", blogController.getAllBlogs);
+router.get("/get-my-blogs", auth(userRole.member), blogController.getMyBlogs);
 router.get("/get-single-blog/:id", blogController.getSingleBlog);
 router.patch(
   "/update-blog/:id",
@@ -25,6 +26,6 @@ router.delete(
   auth(userRole.admin, userRole.member),
   blogController.deleteBlog
 );
-
+router.patch("/remove-image/:id", blogController.removeImage);
 
 export const blogRouter = router;

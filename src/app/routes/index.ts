@@ -2,10 +2,10 @@ import { Router } from "express";
 import { userRouter } from "../modules/user/user.route";
 import { AuthRouter } from "../modules/Auth/auth.route";
 import { ideaRouter } from "../modules/idea/idea.route";
-import { categoryRouter } from "../modules/category/category.route";
 import { blogRouter } from "../modules/blog/blog.route";
 import { voteRouter } from "../modules/vote/vote.route";
 import { commentRouter } from "../modules/comment/comment.route";
+import { paymentRouter } from "../modules/payment/payment.route";
 
 const router = Router();
 
@@ -23,21 +23,21 @@ const moduleRoutes: any = [
     route: ideaRouter,
   },
   {
-    path: "/categories",
-    route: categoryRouter,
-  },
-  {
     path: "/blogs",
-    route: blogRouter
+    route: blogRouter,
   },
   {
     path: "/votes",
-    route: voteRouter
+    route: voteRouter,
   },
   {
-    path: '/comments',
-    route: commentRouter
-  }
+    path: "/comments",
+    route: commentRouter,
+  },
+  {
+    path: "/payments",
+    route: paymentRouter,
+  },
 ];
 
 moduleRoutes.forEach((route: any) => router.use(route.path, route.route));

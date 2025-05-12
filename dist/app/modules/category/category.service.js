@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.categoryServices = void 0;
 const prisma_1 = require("../../utils/prisma");
-const createCategoryIntoDb = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+const createCategory = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const isCategoryExist = yield prisma_1.prisma.category.findFirst({
         where: {
             name: payload.name,
@@ -27,6 +27,11 @@ const createCategoryIntoDb = (payload) => __awaiter(void 0, void 0, void 0, func
     });
     return result;
 });
+const getAllCategories = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.prisma.category.findMany();
+    return result;
+});
 exports.categoryServices = {
-    createCategoryIntoDb,
+    createCategory,
+    getAllCategories
 };

@@ -18,12 +18,12 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const user_service_1 = require("./user.service");
 const registerUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_service_1.userServices.registerUser(req.body);
+    const { result, accessToken } = yield user_service_1.userServices.registerUser(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.CREATED,
         success: true,
         message: "User Registered Successfully",
-        data: result,
+        data: { data: result, accessToken },
     });
 }));
 const getMyProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -57,9 +57,30 @@ const deleteUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: null,
     });
 }));
+const getAllUserFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield user_service_1.userServices.getAllUserFromDb();
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Users are Retrieved Successfully",
+        data: result,
+    });
+}));
+const getSingleUserFromDb = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield user_service_1.userServices.getSingleUserFromDb(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "User is Retrieved Successfully",
+        data: result,
+    });
+}));
 exports.userController = {
     registerUser,
     getMyProfile,
     deleteUser,
     updateUser,
+    getAllUserFromDb,
+    getSingleUserFromDb,
 };

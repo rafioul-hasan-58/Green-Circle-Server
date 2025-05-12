@@ -11,10 +11,7 @@ import { paginationQueries } from "../../utils/prisma";
 const createIdea = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const { user } = req;
-    const result = await ideaServices.createIdea(
-      req.body,
-      user as IAuthUser
-    );
+    const result = await ideaServices.createIdea(req.body, user as IAuthUser);
     sendResponse(res, {
       statusCode: status.CREATED,
       success: true,
@@ -25,8 +22,8 @@ const createIdea = catchAsync(
 );
 const getAllIdeas = catchAsync(async (req, res) => {
   const ideaFilters = pick(req.query, ideaFilterableFields);
-  const paginationOptions = pick(req.query, paginationQueries)
-  console.log(ideaFilters);
+  const paginationOptions = pick(req.query, paginationQueries);
+
   const result = await ideaServices.getAllIdeas(ideaFilters, paginationOptions);
   sendResponse(res, {
     statusCode: status.OK,
@@ -50,9 +47,7 @@ const getSingleIdea = catchAsync(async (req, res) => {
 const getMyIdeas = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const { user } = req;
-    const result = await ideaServices.getMyIdeas(
-      user as IAuthUser
-    );
+    const result = await ideaServices.getMyIdeas(user as IAuthUser);
     sendResponse(res, {
       statusCode: status.OK,
       success: true,

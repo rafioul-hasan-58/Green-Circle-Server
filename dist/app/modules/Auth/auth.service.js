@@ -19,6 +19,8 @@ const prisma_1 = require("../../utils/prisma");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const sendEmail_1 = __importDefault(require("./sendEmail"));
+const AppError_1 = __importDefault(require("../../errors/AppError"));
+const http_status_1 = __importDefault(require("http-status"));
 const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = yield prisma_1.prisma.user.findUniqueOrThrow({
         where: {
@@ -27,7 +29,7 @@ const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     });
     const isCorrectPassword = yield bcrypt_1.default.compare(payload.password, userData.password);
     if (!isCorrectPassword) {
-        throw new Error("Password doesn't match");
+        throw new AppError_1.default(http_status_1.default.NOT_ACCEPTABLE, "Password doesn't match");
     }
     const accessToken = jwt_helpers_1.jwtHelpers.generateToken({
         email: userData.email,
@@ -37,7 +39,7 @@ const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const refreshToken = jwt_helpers_1.jwtHelpers.generateToken({
         email: userData.email,
         role: userData.role,
-        userId: userData.id
+        userId: userData.id,
     }, config_1.default.jwt_refresh_secret, config_1.default.jwt_refresh_expires_in || "1d");
     return {
         accessToken,
@@ -52,10 +54,10 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
         decodedData = jsonwebtoken_1.default.verify(token, config_1.default.jwt_refresh_secret);
     }
     catch (err) {
-        throw new Error("You are not authorized");
+        throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized");
     }
     if (typeof decodedData === "string" || !("email" in decodedData)) {
-        throw new Error("Invalid token payload");
+        throw new AppError_1.default(http_status_1.default.NOT_ACCEPTABLE, "Invalid token payload");
     }
     const userData = yield prisma_1.prisma.user.findUniqueOrThrow({
         where: {
@@ -65,7 +67,7 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     const accessToken = jwt_helpers_1.jwtHelpers.generateToken({
         email: userData.email,
         role: userData.role,
-        userId: userData.id
+        userId: userData.id,
     }, config_1.default.jwt_secret, config_1.default.jwt_expires_in);
     return { accessToken };
 });
@@ -77,7 +79,7 @@ const changePassword = (user, payload) => __awaiter(void 0, void 0, void 0, func
     });
     const isCorrectPassword = yield bcrypt_1.default.compare(payload.oldPassword, userData.password);
     if (!isCorrectPassword) {
-        throw new Error("Password incorrect!");
+        throw new AppError_1.default(http_status_1.default.NOT_ACCEPTABLE, "Password incorrect!");
     }
     const hashedPassword = yield bcrypt_1.default.hash(payload.newPassword, 12);
     yield prisma_1.prisma.user.update({
@@ -115,10 +117,8 @@ const forgotPassword = (payload) => __awaiter(void 0, void 0, void 0, function* 
 
         </div>
         `);
-    //console.log(resetPassLink)
 });
 const resetPassword = (token, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log({ token, payload });
     const userData = yield prisma_1.prisma.user.findUniqueOrThrow({
         where: {
             id: payload.id,
@@ -126,7 +126,7 @@ const resetPassword = (token, payload) => __awaiter(void 0, void 0, void 0, func
     });
     const isValidToken = jsonwebtoken_1.default.verify(token, config_1.default.reset_password_secret);
     if (!isValidToken) {
-        throw new Error("Forbidden!");
+        throw new AppError_1.default(http_status_1.default.FORBIDDEN, "Forbidden!");
     }
     // hash password
     const password = yield bcrypt_1.default.hash(payload.password, 12);
