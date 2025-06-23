@@ -26,6 +26,15 @@ const createVote = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result,
     });
 }));
+const isVoted = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield vote_services_1.voteServices.isVoted(req.body, req.user);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Your voting fetched Successfully",
+        data: result,
+    });
+}));
 const removeVote = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield vote_services_1.voteServices.removeVote(req.body, req.user);
     (0, sendResponse_1.default)(res, {
@@ -37,5 +46,6 @@ const removeVote = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 }));
 exports.voteController = {
     createVote,
-    removeVote
+    removeVote,
+    isVoted
 };

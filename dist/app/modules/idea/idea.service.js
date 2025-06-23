@@ -54,6 +54,77 @@ const getAllIdeas = (filters, paginationOptions) => __awaiter(void 0, void 0, vo
             })),
         });
     }
+    andCondition.push({
+        isDeleted: false,
+    });
+    if (author) {
+        andCondition.push({
+            author: {
+                name: {
+                    contains: author,
+                    mode: "insensitive",
+                },
+            },
+        });
+    }
+    // add filterData condition
+    if (Object.keys(filterData).length > 0) {
+        const filterConditions = Object.keys(filterData).map((key) => ({
+            [key]: {
+                equals: filterData[key],
+            },
+        }));
+        andCondition.push(...filterConditions);
+    }
+    const whereConditions = andCondition.length > 0 ? { AND: andCondition } : {};
+    const result = yield prisma_2.prisma.idea.findMany({
+        where: whereConditions,
+        skip,
+        take: limit,
+        orderBy: sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
+        include: {
+            Vote: true,
+            author: true,
+        },
+    });
+    const total = yield prisma_2.prisma.idea.count({
+        where: whereConditions,
+    });
+    const totalPage = Math.max(1, Math.ceil(total / limit));
+    const enhancedIdeas = result.map((idea) => {
+        const votes = idea.Vote || [];
+        const upVotes = votes.filter((v) => v.value === "up").length;
+        const downVotes = votes.filter((v) => v.value === "down").length;
+        return Object.assign(Object.assign({}, idea), { up_votes: upVotes, down_votes: downVotes, total_votes: upVotes + downVotes });
+    });
+    return {
+        meta: {
+            total,
+            page,
+            limit,
+            totalPage,
+        },
+        data: enhancedIdeas,
+    };
+});
+const getMyIdeas = (filters, paginationOptions, user) => __awaiter(void 0, void 0, void 0, function* () {
+    const { searchTerm, author } = filters, filterData = __rest(filters, ["searchTerm", "author"]);
+    const { limit, page, skip, sortBy, sortOrder } = (0, calculatePagination_1.default)(paginationOptions);
+    const andCondition = [];
+    andCondition.push({
+        authorId: user.userId,
+        isDeleted: false,
+    });
+    if (searchTerm) {
+        andCondition.push({
+            OR: idea_constant_1.ideaSearchAbleFields.map((field) => ({
+                [field]: {
+                    contains: searchTerm,
+                    mode: "insensitive",
+                },
+            })),
+        });
+    }
     if (author) {
         andCondition.push({
             author: {
@@ -122,30 +193,22 @@ const getSingleIdea = (id) => __awaiter(void 0, void 0, void 0, function* () {
     }
     return result;
 });
-const getMyIdeas = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    if (user.role !== "member") {
-        throw new Error("User is not a member");
-    }
-    const isUserExists = yield prisma_2.prisma.user.findUnique({
+const removeIdeaImage = (id, image) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const idea = yield prisma_2.prisma.idea.findUnique({
         where: {
-            email: user.email,
+            id,
         },
     });
-    if (!isUserExists) {
-        throw new Error("User not found");
-    }
-    const result = yield prisma_2.prisma.idea.findMany({
+    const updatedImage = (_a = idea === null || idea === void 0 ? void 0 : idea.images) === null || _a === void 0 ? void 0 : _a.filter((img) => img !== image);
+    const result = yield prisma_2.prisma.idea.update({
         where: {
-            authorId: isUserExists.id,
-            isDeleted: false,
+            id,
         },
-        include: {
-            author: true,
+        data: {
+            images: updatedImage,
         },
     });
-    if (result.length === 0) {
-        throw new Error("No ideas found for this user");
-    }
     return result;
 });
 const updateIdea = (user, id, payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -205,4 +268,5 @@ exports.ideaServices = {
     getSingleIdea,
     updateIdea,
     deleteIdea,
+    removeIdeaImage,
 };

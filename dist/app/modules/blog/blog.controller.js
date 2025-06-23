@@ -18,8 +18,8 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const blog_service_1 = require("./blog.service");
 const http_status_1 = __importDefault(require("http-status"));
 const pick_1 = __importDefault(require("../../utils/pick"));
-const blog_constant_1 = require("./blog.constant");
 const prisma_1 = require("../../utils/prisma");
+const blog_constant_1 = require("./blog.constant");
 const writeBlog = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user } = req;
     const result = yield blog_service_1.blogServices.writeBlog(req.body, user);
@@ -31,7 +31,7 @@ const writeBlog = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
     });
 }));
 const getAllBlogs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const filters = (0, pick_1.default)(req.query, blog_constant_1.blogfilterableFields);
+    const filters = (0, pick_1.default)(req.query, blog_constant_1.blogFilterableFields);
     const paginationOptions = (0, pick_1.default)(req.body, prisma_1.paginationQueries);
     const result = yield blog_service_1.blogServices.getAllBlogs(filters, paginationOptions);
     (0, sendResponse_1.default)(res, {
@@ -43,7 +43,7 @@ const getAllBlogs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
     });
 }));
 const getMyBlogs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const filters = (0, pick_1.default)(req.query, blog_constant_1.blogfilterableFields);
+    const filters = (0, pick_1.default)(req.query, blog_constant_1.blogFilterableFields);
     const paginationOptions = (0, pick_1.default)(req.body, prisma_1.paginationQueries);
     const result = yield blog_service_1.blogServices.getMyBlogs(filters, paginationOptions, req.user);
     (0, sendResponse_1.default)(res, {
@@ -101,5 +101,5 @@ exports.blogController = {
     editBlog,
     deleteBlog,
     getMyBlogs,
-    removeImage
+    removeImage,
 };

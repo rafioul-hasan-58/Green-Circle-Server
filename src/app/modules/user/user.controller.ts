@@ -16,6 +16,7 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
 });
 const getMyProfile = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
+    ;
     const { user } = req;
     const result = await userServices.getMyProfile(user as IAuthUser);
     sendResponse(res, {
@@ -38,6 +39,7 @@ const updateUser = catchAsync(
     });
   }
 );
+
 const deleteUser = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const { user } = req;

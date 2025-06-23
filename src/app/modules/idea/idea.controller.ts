@@ -23,7 +23,6 @@ const createIdea = catchAsync(
 const getAllIdeas = catchAsync(async (req, res) => {
   const ideaFilters = pick(req.query, ideaFilterableFields);
   const paginationOptions = pick(req.query, paginationQueries);
-
   const result = await ideaServices.getAllIdeas(ideaFilters, paginationOptions);
   sendResponse(res, {
     statusCode: status.OK,
@@ -46,16 +45,33 @@ const getSingleIdea = catchAsync(async (req, res) => {
 
 const getMyIdeas = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const ideaFilters = pick(req.query, ideaFilterableFields);
+    const paginationOptions = pick(req.query, paginationQueries);
     const { user } = req;
-    const result = await ideaServices.getMyIdeas(user as IAuthUser);
+    const result = await ideaServices.getMyIdeas(
+      ideaFilters,
+      paginationOptions,
+      user as IAuthUser
+    );
     sendResponse(res, {
       statusCode: status.OK,
       success: true,
       message: "My Ideas Retrieved Successfully",
-      data: result,
+      meta: result.meta,
+      data: result.data,
     });
   }
 );
+const removeIdeaImage = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await ideaServices.removeIdeaImage(id, req.body.image);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Image removed Successfully",
+    data: result,
+  });
+});
 const updateIdea = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const { user } = req;
@@ -93,4 +109,5 @@ export const ideaControllers = {
   getMyIdeas,
   updateIdea,
   deleteIdea,
+  removeIdeaImage,
 };

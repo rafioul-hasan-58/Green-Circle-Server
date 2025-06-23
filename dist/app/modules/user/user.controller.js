@@ -27,6 +27,7 @@ const registerUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     });
 }));
 const getMyProfile = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    ;
     const { user } = req;
     const result = yield user_service_1.userServices.getMyProfile(user);
     (0, sendResponse_1.default)(res, {

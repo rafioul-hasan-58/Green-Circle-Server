@@ -31,10 +31,10 @@ const verifyPayment = catchAsync(async (req, res) => {
     data: result,
   });
 });
-const getPaymentForMe = catchAsync(
+const getOrderWhichPayMe = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const { user } = req;
-    const result = await paymentServices.getPaymentForMe(user as IAuthUser);
+    const result = await paymentServices.getOrderWhichPayMe(user as IAuthUser);
     sendResponse(res, {
       statusCode: status.OK,
       success: true,
@@ -43,6 +43,16 @@ const getPaymentForMe = catchAsync(
     });
   }
 );
+const getAllOrder = catchAsync(async (req, res) => {
+  const result = await paymentServices.getAllOrder();
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Payments are retrieved Successfully",
+    data: result,
+  });
+});
+
 const getSinglePayment = catchAsync(
   async (req: Request & { user?: IAuthUser }, res: Response) => {
     const { user } = req;
@@ -63,6 +73,7 @@ const getSinglePayment = catchAsync(
 export const paymentControllers = {
   makePayment,
   verifyPayment,
-  getPaymentForMe,
+  getOrderWhichPayMe,
   getSinglePayment,
+  getAllOrder,
 };

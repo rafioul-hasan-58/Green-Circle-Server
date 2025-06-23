@@ -83,6 +83,7 @@ const getAllBlogs = (filters, paginationOptions) => __awaiter(void 0, void 0, vo
     const total = yield prisma_1.prisma.blog.count({
         where: whereConditions,
     });
+    const totalPage = Math.max(1, Math.ceil(total / limit));
     const enhancedIdeas = result.map((blog) => {
         const votes = blog.Vote || [];
         const upVotes = votes.filter((v) => v.value === "up").length;
@@ -94,6 +95,7 @@ const getAllBlogs = (filters, paginationOptions) => __awaiter(void 0, void 0, vo
             page,
             limit,
             total,
+            totalPage,
         },
         data: enhancedIdeas,
     };
@@ -167,8 +169,14 @@ const getBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {
         where: {
             id,
         },
+        include: {
+            Vote: true,
+        },
     });
-    return result;
+    const up_votes = result === null || result === void 0 ? void 0 : result.Vote.filter((v) => v.value === "up").length;
+    const down_votes = result === null || result === void 0 ? void 0 : result.Vote.filter((v) => v.value === "down").length;
+    return Object.assign(Object.assign({}, result), { up_votes,
+        down_votes });
 });
 const editBlog = (id, payload, user) => __awaiter(void 0, void 0, void 0, function* () {
     const blogData = yield prisma_1.prisma.blog.findUnique({

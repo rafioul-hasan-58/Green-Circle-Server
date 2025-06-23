@@ -56,10 +56,13 @@ const getMyProfile = (user) => __awaiter(void 0, void 0, void 0, function* () {
             isDeleted: false,
         },
     });
+    if (!userData) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found!");
+    }
     return userData;
 });
 const updateUser = (user, updatedPayload) => __awaiter(void 0, void 0, void 0, function* () {
-    const userData = yield prisma_1.prisma.user.findUniqueOrThrow({
+    const userData = yield prisma_1.prisma.user.findUnique({
         where: {
             email: user.email,
         },
@@ -76,12 +79,15 @@ const updateUser = (user, updatedPayload) => __awaiter(void 0, void 0, void 0, f
     return result;
 });
 const deleteUser = (user, deletedId) => __awaiter(void 0, void 0, void 0, function* () {
-    const userData = yield prisma_1.prisma.user.findUniqueOrThrow({
+    const userData = yield prisma_1.prisma.user.findUnique({
         where: {
             email: user.email,
         },
     });
-    const deletedData = yield prisma_1.prisma.user.findUniqueOrThrow({
+    if (!userData) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found!");
+    }
+    const deletedData = yield prisma_1.prisma.user.findUnique({
         where: {
             id: deletedId,
             isDeleted: false,

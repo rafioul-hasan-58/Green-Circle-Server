@@ -221,17 +221,17 @@ exports.categoryName = exports.$Enums.categoryName = {
 };
 
 exports.ideaStatus = exports.$Enums.ideaStatus = {
-  pending: 'pending',
+  underReview: 'underReview',
   draft: 'draft',
-  published: 'published',
-  unpublished: 'unpublished'
+  approved: 'approved',
+  rejected: 'rejected'
 };
 
 exports.blogStatus = exports.$Enums.blogStatus = {
-  pending: 'pending',
+  underReview: 'underReview',
   draft: 'draft',
-  published: 'published',
-  unpublished: 'unpublished'
+  approved: 'approved',
+  rejected: 'rejected'
 };
 
 exports.voteValue = exports.$Enums.voteValue = {

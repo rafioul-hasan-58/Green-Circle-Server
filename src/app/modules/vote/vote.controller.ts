@@ -15,6 +15,15 @@ const createVote = catchAsync(async (req: Request & { user?: IAuthUser }, res: R
         data: result,
     });
 });
+const isVoted = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const result = await voteServices.isVoted(req.body, req.user as IAuthUser);
+    sendResponse(res, {
+        statusCode: status.OK,
+        success: true,
+        message: "Your voting fetched Successfully", 
+        data: result,
+    });
+});
 const removeVote = catchAsync(async (req: Request & { user?: IAuthUser }, res: Response) => {
     const result = await voteServices.removeVote(req.body, req.user as IAuthUser);
     sendResponse(res, {
@@ -27,5 +36,6 @@ const removeVote = catchAsync(async (req: Request & { user?: IAuthUser }, res: R
 
 export const voteController = {
     createVote,
-    removeVote
+    removeVote,
+    isVoted
 }

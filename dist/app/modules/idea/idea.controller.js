@@ -53,12 +53,24 @@ const getSingleIdea = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
     });
 }));
 const getMyIdeas = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const ideaFilters = (0, pick_1.default)(req.query, idea_constant_1.ideaFilterableFields);
+    const paginationOptions = (0, pick_1.default)(req.query, prisma_1.paginationQueries);
     const { user } = req;
-    const result = yield idea_service_1.ideaServices.getMyIdeas(user);
+    const result = yield idea_service_1.ideaServices.getMyIdeas(ideaFilters, paginationOptions, user);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
         message: "My Ideas Retrieved Successfully",
+        data: result,
+    });
+}));
+const removeIdeaImage = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield idea_service_1.ideaServices.removeIdeaImage(id, req.body.image);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Image removed Successfully",
         data: result,
     });
 }));
@@ -91,4 +103,5 @@ exports.ideaControllers = {
     getMyIdeas,
     updateIdea,
     deleteIdea,
+    removeIdeaImage,
 };

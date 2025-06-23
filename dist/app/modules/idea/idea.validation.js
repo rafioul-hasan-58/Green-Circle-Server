@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ideaValidationSchemas = exports.updateIdeaValidationSchema = exports.createIdeaValidationSchema = exports.ideaStatusEnum = void 0;
 const zod_1 = require("zod");
-exports.ideaStatusEnum = zod_1.z.enum(["pending", "approved", "rejected"]);
+exports.ideaStatusEnum = zod_1.z.enum(["underReview", "draft", "approved", "rejected"]);
 const categoryEnum = zod_1.z.enum(["energy", "waste", "transportation"]);
 exports.createIdeaValidationSchema = zod_1.z.object({
     title: zod_1.z.string().min(1),

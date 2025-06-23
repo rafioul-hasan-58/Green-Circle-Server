@@ -21,12 +21,17 @@ router.get(
   ideaControllers.getMyIdeas
 );
 router.patch(
+  "/remove-image/:id",
+  auth(userRole.member, userRole.admin),
+  ideaControllers.removeIdeaImage
+);
+router.patch(
   "/update-idea/:id",
   auth(userRole.member, userRole.admin),
   validateRequest(ideaValidationSchemas.updateIdeaValidationSchema),
   ideaControllers.updateIdea
 );
-router.patch(
+router.delete(
   "/delete-idea/:id",
   auth(userRole.member, userRole.admin),
   ideaControllers.deleteIdea

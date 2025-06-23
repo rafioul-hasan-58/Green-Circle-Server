@@ -49,10 +49,10 @@ export type Payment = $Result.DefaultSelection<Prisma.$PaymentPayload>
  */
 export namespace $Enums {
   export const ideaStatus: {
-  pending: 'pending',
+  underReview: 'underReview',
   draft: 'draft',
-  published: 'published',
-  unpublished: 'unpublished'
+  approved: 'approved',
+  rejected: 'rejected'
 };
 
 export type ideaStatus = (typeof ideaStatus)[keyof typeof ideaStatus]
@@ -68,10 +68,10 @@ export type paymentStatus = (typeof paymentStatus)[keyof typeof paymentStatus]
 
 
 export const blogStatus: {
-  pending: 'pending',
+  underReview: 'underReview',
   draft: 'draft',
-  published: 'published',
-  unpublished: 'unpublished'
+  approved: 'approved',
+  rejected: 'rejected'
 };
 
 export type blogStatus = (typeof blogStatus)[keyof typeof blogStatus]

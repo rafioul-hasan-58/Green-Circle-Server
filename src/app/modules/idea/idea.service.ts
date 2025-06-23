@@ -1,4 +1,6 @@
+import status from "http-status";
 import { Idea, Prisma, userRole } from "../../../../generated/prisma";
+import AppError from "../../errors/AppError";
 import { IPaginationOptions } from "../../interface/pagination";
 import calculatePagination from "../../utils/calculatePagination";
 import { prisma } from "../../utils/prisma";
@@ -8,7 +10,13 @@ import { TIdeaFilterRequest } from "./idea.interface";
 
 const createIdea = async (payload: Idea, user: IAuthUser) => {
   if (!user.userId) {
-    throw new Error("User not found");
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+  if (user?.email === "member@demo.com") {
+    throw new AppError(
+      status.FORBIDDEN,
+      "Demo user cannot create idea. Please register first"
+    );
   }
   const result = await prisma.idea.create({
     data: {
@@ -31,6 +39,93 @@ const getAllIdeas = async (
     calculatePagination(paginationOptions);
   const andCondition: Prisma.IdeaWhereInput[] = [];
 
+  if (searchTerm) {
+    andCondition.push({
+      OR: ideaSearchAbleFields.map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+  andCondition.push({
+    isDeleted: false,
+  });
+  if (author) {
+    andCondition.push({
+      author: {
+        name: {
+          contains: author,
+          mode: "insensitive",
+        },
+      },
+    });
+  }
+  // add filterData condition
+  if (Object.keys(filterData).length > 0) {
+    const filterConditions = Object.keys(filterData).map((key) => ({
+      [key]: {
+        equals: filterData[key as keyof typeof filterData],
+      },
+    }));
+    andCondition.push(...filterConditions);
+  }
+
+  const whereConditions: Prisma.IdeaWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  const result = await prisma.idea.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
+    include: {
+      Vote: true,
+      author: true,
+    },
+  });
+  const total = await prisma.idea.count({
+    where: whereConditions,
+  });
+  const totalPage = Math.max(1, Math.ceil(total / limit));
+  const enhancedIdeas = result.map((idea) => {
+    const votes = idea.Vote || [];
+
+    const upVotes = votes.filter((v) => v.value === "up").length;
+    const downVotes = votes.filter((v) => v.value === "down").length;
+
+    return {
+      ...idea,
+      up_votes: upVotes,
+      down_votes: downVotes,
+      total_votes: upVotes + downVotes,
+    };
+  });
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+      totalPage,
+    },
+    data: enhancedIdeas,
+  };
+};
+const getMyIdeas = async (
+  filters: TIdeaFilterRequest,
+  paginationOptions: IPaginationOptions,
+  user: IAuthUser
+) => {
+  const { searchTerm, author, ...filterData } = filters;
+  const { limit, page, skip, sortBy, sortOrder } =
+    calculatePagination(paginationOptions);
+  const andCondition: Prisma.IdeaWhereInput[] = [];
+  andCondition.push({
+    authorId: user.userId,
+    isDeleted: false,
+  });
   if (searchTerm) {
     andCondition.push({
       OR: ideaSearchAbleFields.map((field) => ({
@@ -124,31 +219,21 @@ const getSingleIdea = async (id: string) => {
   return result;
 };
 
-const getMyIdeas = async (user: IAuthUser) => {
-  if (user.role !== "member") {
-    throw new Error("User is not a member");
-  }
-  const isUserExists = await prisma.user.findUnique({
+const removeIdeaImage = async (id: string, image: string) => {
+  const idea = await prisma.idea.findUnique({
     where: {
-      email: user.email,
+      id,
     },
   });
-  if (!isUserExists) {
-    throw new Error("User not found");
-  }
-
-  const result = await prisma.idea.findMany({
+  const updatedImage = idea?.images?.filter((img) => img !== image);
+  const result = await prisma.idea.update({
     where: {
-      authorId: isUserExists.id,
-      isDeleted: false,
+      id,
     },
-    include: {
-      author: true,
+    data: {
+      images: updatedImage,
     },
   });
-  if (result.length === 0) {
-    throw new Error("No ideas found for this user");
-  }
   return result;
 };
 const updateIdea = async (user: IAuthUser, id: string, payload: Idea) => {
@@ -210,4 +295,5 @@ export const ideaServices = {
   getSingleIdea,
   updateIdea,
   deleteIdea,
+  removeIdeaImage,
 };

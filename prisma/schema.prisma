@@ -41,7 +41,7 @@ model Idea {
   proposed_solution String
   isPremium         Boolean      @default(false)
   price             String
-  status            ideaStatus   @default(pending)
+  status            ideaStatus   @default(underReview)
   isDeleted         Boolean      @default(false)
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
@@ -117,10 +117,10 @@ model Payment {
 }
 
 enum ideaStatus {
-  pending
+  underReview
   draft
-  published
-  unpublished
+  approved
+  rejected
 }
 
 enum paymentStatus {
@@ -130,10 +130,10 @@ enum paymentStatus {
 }
 
 enum blogStatus {
-  pending
+  underReview
   draft
-  published
-  unpublished
+  approved
+  rejected
 }
 
 enum categoryName {

@@ -6,7 +6,13 @@ import status from "http-status";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import router from "./app/routes";
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://greenovatehub.vercel.app",
+    // origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 
 // parser
@@ -15,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req: Request, res: Response) => {
   res.send({
-    Message: "Green Circle Server Is Running",
+    Message: "Greenovate Hub Server Is Running",
   });
 });
 app.use("/api", router);

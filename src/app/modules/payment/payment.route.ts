@@ -18,7 +18,12 @@ router.post(
   auth(userRole.member),
   paymentControllers.verifyPayment
 );
-router.get("/me", auth(userRole.member), paymentControllers.getPaymentForMe);
+router.get(
+  "/my-order",
+  auth(userRole.member),
+  paymentControllers.getOrderWhichPayMe
+);
+router.get("/", auth(userRole.admin), paymentControllers.getAllOrder);
 router.get(
   "/:ideaId",
   auth(userRole.member),

@@ -1,11 +1,11 @@
 -- CreateEnum
-CREATE TYPE "ideaStatus" AS ENUM ('pending', 'draft', 'published', 'unpublished');
+CREATE TYPE "ideaStatus" AS ENUM ('underReview', 'draft', 'approved', 'rejected');
 
 -- CreateEnum
 CREATE TYPE "paymentStatus" AS ENUM ('pending', 'paid', 'unpaid');
 
 -- CreateEnum
-CREATE TYPE "blogStatus" AS ENUM ('pending', 'draft', 'published', 'unpublished');
+CREATE TYPE "blogStatus" AS ENUM ('underReview', 'draft', 'approved', 'rejected');
 
 -- CreateEnum
 CREATE TYPE "categoryName" AS ENUM ('energy', 'waste', 'transportation');
@@ -43,7 +43,7 @@ CREATE TABLE "ideas" (
     "proposed_solution" TEXT NOT NULL,
     "isPremium" BOOLEAN NOT NULL DEFAULT false,
     "price" TEXT NOT NULL,
-    "status" "ideaStatus" NOT NULL DEFAULT 'pending',
+    "status" "ideaStatus" NOT NULL DEFAULT 'underReview',
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -95,10 +95,12 @@ CREATE TABLE "comments" (
 CREATE TABLE "payments" (
     "id" TEXT NOT NULL,
     "ideaId" TEXT NOT NULL,
+    "ideaTitle" TEXT NOT NULL,
     "authorId" TEXT NOT NULL,
     "transactionId" TEXT NOT NULL,
     "status" "paymentStatus" NOT NULL DEFAULT 'pending',
     "amount" INTEGER NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -119,6 +121,9 @@ CREATE UNIQUE INDEX "votes_voterId_ideaId_key" ON "votes"("voterId", "ideaId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "votes_voterId_blogId_key" ON "votes"("voterId", "blogId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "payments_transactionId_key" ON "payments"("transactionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "payments_ideaId_authorId_key" ON "payments"("ideaId", "authorId");

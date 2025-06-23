@@ -9,11 +9,15 @@ import AppError from "../../errors/AppError";
 import status from "http-status";
 
 const login = async (payload: { email: string; password: string }) => {
-  const userData = await prisma.user.findUniqueOrThrow({
+  const userData = await prisma.user.findUnique({
     where: {
       email: payload.email,
+      isDeleted: false,
     },
   });
+  if (!userData) {
+    throw new AppError(status.NOT_FOUND, "User not found!");
+  }
   const isCorrectPassword = await bcrypt.compare(
     payload.password,
     userData.password
@@ -57,11 +61,14 @@ const refreshToken = async (token: string) => {
   if (typeof decodedData === "string" || !("email" in decodedData)) {
     throw new AppError(status.NOT_ACCEPTABLE, "Invalid token payload");
   }
-  const userData = await prisma.user.findUniqueOrThrow({
+  const userData = await prisma.user.findUnique({
     where: {
       email: decodedData.email,
     },
   });
+  if (!userData) {
+    throw new AppError(status.NOT_FOUND, "User not found!");
+  }
   const accessToken = jwtHelpers.generateToken(
     {
       email: userData.email,
@@ -78,11 +85,14 @@ const changePassword = async (
   user: IAuthUser,
   payload: { oldPassword: string; newPassword: string }
 ) => {
-  const userData = await prisma.user.findUniqueOrThrow({
+  const userData = await prisma.user.findUnique({
     where: {
       email: user?.email,
     },
   });
+  if (!userData) {
+    throw new AppError(status.NOT_FOUND, "User not found!");
+  }
 
   const isCorrectPassword: boolean = await bcrypt.compare(
     payload.oldPassword,
@@ -148,12 +158,14 @@ const resetPassword = async (
   token: string,
   payload: { id: string; password: string }
 ) => {
-  const userData = await prisma.user.findUniqueOrThrow({
+  const userData = await prisma.user.findUnique({
     where: {
       id: payload.id,
     },
   });
-
+  if (!userData) {
+    throw new AppError(status.NOT_FOUND, "User not found!");
+  }
   const isValidToken = jwt.verify(
     token,
     config.reset_password_secret as string

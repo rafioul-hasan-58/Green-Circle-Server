@@ -11,4 +11,5 @@ const prisma_1 = require("../../../../generated/prisma");
 const router = (0, express_1.Router)();
 router.post("/create-vote", (0, auth_1.default)(prisma_1.userRole.admin, prisma_1.userRole.member), vote_controller_1.voteController.createVote);
 router.delete("/remove-vote", (0, auth_1.default)(prisma_1.userRole.admin, prisma_1.userRole.member), vote_controller_1.voteController.removeVote);
+router.post("/isvoted", (0, auth_1.default)(prisma_1.userRole.member, prisma_1.userRole.admin), vote_controller_1.voteController.isVoted);
 exports.voteRouter = router;

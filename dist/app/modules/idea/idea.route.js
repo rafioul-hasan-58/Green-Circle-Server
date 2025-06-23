@@ -15,6 +15,7 @@ router.post("/create-idea", (0, auth_1.default)(prisma_1.userRole.member), (0, v
 router.get("/get-all-ideas", idea_controller_1.ideaControllers.getAllIdeas);
 router.get("/get-idea/:id", idea_controller_1.ideaControllers.getSingleIdea);
 router.get("/get-my-ideas", (0, auth_1.default)(prisma_1.userRole.member), idea_controller_1.ideaControllers.getMyIdeas);
+router.patch("/remove-image/:id", (0, auth_1.default)(prisma_1.userRole.member, prisma_1.userRole.admin), idea_controller_1.ideaControllers.removeIdeaImage);
 router.patch("/update-idea/:id", (0, auth_1.default)(prisma_1.userRole.member, prisma_1.userRole.admin), (0, validateRequest_1.default)(idea_validation_1.ideaValidationSchemas.updateIdeaValidationSchema), idea_controller_1.ideaControllers.updateIdea);
-router.patch("/delete-idea/:id", (0, auth_1.default)(prisma_1.userRole.member, prisma_1.userRole.admin), idea_controller_1.ideaControllers.deleteIdea);
+router.delete("/delete-idea/:id", (0, auth_1.default)(prisma_1.userRole.member, prisma_1.userRole.admin), idea_controller_1.ideaControllers.deleteIdea);
 exports.ideaRouter = router;

@@ -1,3 +1,5 @@
+import status from "http-status";
+import AppError from "../../errors/AppError";
 import { prisma } from "../../utils/prisma";
 import { IAuthUser } from "../user/user.interface";
 import { IComment } from "./comment.interface";
@@ -22,6 +24,9 @@ const editComment = async (
       id,
     },
   });
+  if (!commentData) {
+    throw new AppError(status.NOT_FOUND, "Comment not found!");
+  }
   if (commentData?.commenterId !== user.userId) {
     throw new Error("You cannot update this comment");
   }
@@ -41,6 +46,9 @@ const deleteComment = async (id: string, user: IAuthUser) => {
       id,
     },
   });
+  if (!commentData) {
+    throw new AppError(status.NOT_FOUND, "Comment not found!");
+  }
   if (commentData?.commenterId !== user.userId) {
     throw new Error("You cannot delete this comment");
   }

@@ -8,8 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.commentService = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const AppError_1 = __importDefault(require("../../errors/AppError"));
 const prisma_1 = require("../../utils/prisma");
 const createComment = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
     const result = prisma_1.prisma.comment.create({
@@ -23,6 +28,9 @@ const editComment = (id, payload, user) => __awaiter(void 0, void 0, void 0, fun
             id,
         },
     });
+    if (!commentData) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Comment not found!");
+    }
     if ((commentData === null || commentData === void 0 ? void 0 : commentData.commenterId) !== user.userId) {
         throw new Error("You cannot update this comment");
     }
@@ -42,6 +50,9 @@ const deleteComment = (id, user) => __awaiter(void 0, void 0, void 0, function* 
             id,
         },
     });
+    if (!commentData) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Comment not found!");
+    }
     if ((commentData === null || commentData === void 0 ? void 0 : commentData.commenterId) !== user.userId) {
         throw new Error("You cannot delete this comment");
     }

@@ -20,14 +20,14 @@ const createVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
             where: {
                 voterId_ideaId: {
                     voterId: user.userId,
-                    ideaId: payload.ideaId
-                }
-            }
+                    ideaId: payload.ideaId,
+                },
+            },
         });
         isIdeaExists = yield prisma_1.prisma.idea.findUnique({
             where: {
-                id: payload.ideaId
-            }
+                id: payload.ideaId,
+            },
         });
     }
     if (payload.blogId) {
@@ -35,14 +35,14 @@ const createVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
             where: {
                 voterId_blogId: {
                     voterId: user.userId,
-                    blogId: payload.blogId
-                }
-            }
+                    blogId: payload.blogId,
+                },
+            },
         });
         isBlogExists = yield prisma_1.prisma.blog.findUnique({
             where: {
-                id: payload.blogId
-            }
+                id: payload.blogId,
+            },
         });
     }
     if (payload.ideaId && !isIdeaExists) {
@@ -53,20 +53,23 @@ const createVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
     }
     let result;
     if (isVoteExists) {
-        if ((isVoteExists.blogId === payload.blogId && isVoteExists.voterId === user.userId) || (isVoteExists.ideaId === payload.ideaId && isVoteExists.voterId === user.userId)) {
+        if ((isVoteExists.blogId === payload.blogId &&
+            isVoteExists.voterId === user.userId) ||
+            (isVoteExists.ideaId === payload.ideaId &&
+                isVoteExists.voterId === user.userId)) {
             result = yield prisma_1.prisma.vote.update({
                 where: {
-                    id: isVoteExists.id
+                    id: isVoteExists.id,
                 },
                 data: {
-                    value: payload.value
-                }
+                    value: payload.value,
+                },
             });
         }
     }
     else {
         result = yield prisma_1.prisma.vote.create({
-            data: Object.assign(Object.assign({}, payload), { voterId: user.userId })
+            data: Object.assign(Object.assign({}, payload), { voterId: user.userId }),
         });
     }
     return result;
@@ -78,9 +81,9 @@ const removeVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
             where: {
                 voterId_ideaId: {
                     voterId: user.userId,
-                    ideaId: payload.ideaId
-                }
-            }
+                    ideaId: payload.ideaId,
+                },
+            },
         });
     }
     else if (payload.blogId) {
@@ -88,9 +91,9 @@ const removeVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
             where: {
                 voterId_blogId: {
                     voterId: user.userId,
-                    blogId: payload.blogId
-                }
-            }
+                    blogId: payload.blogId,
+                },
+            },
         });
     }
     if (!isVoteExists) {
@@ -98,12 +101,52 @@ const removeVote = (payload, user) => __awaiter(void 0, void 0, void 0, function
     }
     const result = yield prisma_1.prisma.vote.delete({
         where: {
-            id: isVoteExists.id
-        }
+            id: isVoteExists.id,
+        },
     });
+    return result;
+});
+const isVoted = (payload, user) => __awaiter(void 0, void 0, void 0, function* () {
+    let vote;
+    if (payload.blogId) {
+        vote = yield prisma_1.prisma.vote.findUnique({
+            where: {
+                voterId_blogId: {
+                    voterId: user.userId,
+                    blogId: payload.blogId,
+                },
+            },
+            select: {
+                value: true,
+            },
+        });
+    }
+    if (payload.ideaId) {
+        vote = yield prisma_1.prisma.vote.findUnique({
+            where: {
+                voterId_ideaId: {
+                    voterId: user.userId,
+                    ideaId: payload.ideaId,
+                },
+            },
+            select: {
+                value: true,
+            },
+        });
+    }
+    let result;
+    if (!vote) {
+        result = {
+            isVoted: false,
+        };
+    }
+    else {
+        result = Object.assign(Object.assign({}, vote), { isVoted: true });
+    }
     return result;
 });
 exports.voteServices = {
     createVote,
-    removeVote
+    removeVote,
+    isVoted,
 };
