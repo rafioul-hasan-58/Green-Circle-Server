@@ -8,7 +8,8 @@ import router from "./app/routes";
 
 app.use(
   cors({
-    origin: "https://greeni-circle-client.vercel.app",
+    origin: "https://greenovatehub.vercel.app",
+    // origin: "http://localhost:3000",
     credentials: true,
   })
 );
@@ -20,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req: Request, res: Response) => {
   res.send({
-    Message: "Green Circle Server Is Running",
+    Message: "Greenovate Hub Server Is Running",
   });
 });
 app.use("/api", router);

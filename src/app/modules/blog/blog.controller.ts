@@ -22,7 +22,7 @@ const writeBlog = catchAsync(
 );
 const getAllBlogs = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, blogFilterableFields);
-  const paginationOptions = pick(req.body, paginationQueries);
+  const paginationOptions = pick(req.query, paginationQueries);
   const result = await blogServices.getAllBlogs(filters, paginationOptions);
   sendResponse(res, {
     statusCode: status.OK,

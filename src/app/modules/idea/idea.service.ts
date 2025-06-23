@@ -1,4 +1,6 @@
+import status from "http-status";
 import { Idea, Prisma, userRole } from "../../../../generated/prisma";
+import AppError from "../../errors/AppError";
 import { IPaginationOptions } from "../../interface/pagination";
 import calculatePagination from "../../utils/calculatePagination";
 import { prisma } from "../../utils/prisma";
@@ -8,7 +10,13 @@ import { TIdeaFilterRequest } from "./idea.interface";
 
 const createIdea = async (payload: Idea, user: IAuthUser) => {
   if (!user.userId) {
-    throw new Error("User not found");
+    throw new AppError(status.NOT_FOUND, "User not found");
+  }
+  if (user?.email === "member@demo.com") {
+    throw new AppError(
+      status.FORBIDDEN,
+      "Demo user cannot create idea. Please register first"
+    );
   }
   const result = await prisma.idea.create({
     data: {

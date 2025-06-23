@@ -83,7 +83,6 @@ const makePayment = async (
         transactionId: result?.sp_order_id,
       },
     });
-    console.log(res);
   }
   return result?.checkout_url;
 };
@@ -116,7 +115,6 @@ const verifyPayment = async (order_id: string) => {
       },
     });
   }
-  console.log(result);
   return verifyPayment;
 };
 const getOrderWhichPayMe = async (user: IAuthUser) => {

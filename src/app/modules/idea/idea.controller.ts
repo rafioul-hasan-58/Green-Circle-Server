@@ -57,7 +57,8 @@ const getMyIdeas = catchAsync(
       statusCode: status.OK,
       success: true,
       message: "My Ideas Retrieved Successfully",
-      data: result,
+      meta: result.meta,
+      data: result.data,
     });
   }
 );
